@@ -1,0 +1,84 @@
+<% provide(:title, 'Create Poll') %>
+<h1>Create a New Poll</h1>
+
+<div class="row">
+  <div class="col-md-6 col-md-offset-3">
+    <%= form_with(model: @poll, local: true) do |f| %>
+      <%= render 'shared/error_messages', object: f.object %>
+      
+      <div class="field">
+        <%= f.label :question %>
+        <%= f.text_field :question, class: 'form-control', placeholder: "What would you like to ask?" %>
+      </div>
+      
+      <div class="poll-options">
+        <h4>Poll Options</h4>
+        <div id="poll-options-fields">
+          <%= f.fields_for :poll_options do |option_form| %>
+            <div class="option-field">
+              <%= option_form.text_field :option_text, class: 'form-control', 
+                                          placeholder: "Option #{option_form.index + 1}" %>
+            </div>
+          <% end %>
+        </div>
+        <button type="button" id="add-option" class="btn btn-sm btn-info">Add Option</button>
+      </div>
+      
+      <%= f.submit "Create Poll", class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+// Remove any existing listeners first
+if (window.pollOptionsHandler) {
+  document.removeEventListener('turbo:load', window.pollOptionsHandler);
+}
+
+window.pollOptionsHandler = function() {
+  const addButton = document.getElementById('add-option');
+  if (!addButton) return;
+  
+  // Remove any existing click listeners
+  const newButton = addButton.cloneNode(true);
+  addButton.parentNode.replaceChild(newButton, addButton);
+  
+  const optionsContainer = document.getElementById('poll-options-fields');
+  
+  newButton.addEventListener('click', function(e) {
+    e.preventDefault();
+    const optionCount = document.querySelectorAll('.option-field').length;
+    const newOption = document.createElement('div');
+    newOption.className = 'option-field';
+    newOption.innerHTML = `
+      <input class="form-control" placeholder="Option ${optionCount + 1}" 
+             type="text" name="poll[poll_options_attributes][${optionCount}][option_text]" 
+             id="poll_poll_options_attributes_${optionCount}_option_text">
+    `;
+    optionsContainer.appendChild(newOption);
+  });
+};
+
+document.addEventListener('turbo:load', window.pollOptionsHandler);
+// Also run it immediately for first page load
+window.pollOptionsHandler();
+</script>
+
+<style>
+  .option-field {
+    margin-bottom: 10px;
+  }
+  .poll-options {
+    margin: 20px 0;
+  }
+  #add-option {
+    margin-top: 10px;
+  }
+  .checkbox label {
+    font-weight: normal;
+    margin-bottom: 15px;
+  }
+  .checkbox input[type="checkbox"] {
+    margin-right: 5px;
+  }
+</style>

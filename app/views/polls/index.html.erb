@@ -1,0 +1,125 @@
+<% provide(:title, 'All Polls') %>
+<h1>All Polls</h1>
+
+<div class="row">
+  <div class="col-md-8">
+    <%= link_to "Create New Poll", new_poll_path, class: "btn btn-primary" %>
+    
+    <% if @polls.any? %>
+      <div class="polls">
+        <% @polls.each do |poll| %>
+          <div class="poll-item">
+            <div class="poll-header">
+              <%= link_to gravatar_for(poll.user, size: 50), poll.user %>
+              <div class="poll-info">
+                <h4><%= link_to poll.question, poll %></h4>
+                <span class="poll-meta">
+                  by <%= link_to poll.user.name, poll.user %> • 
+                  <%= time_ago_in_words(poll.created_at) %> ago •
+                  <%= poll.total_votes %> votes
+                </span>
+              </div>
+            </div>
+            
+            <div class="poll-options-preview">
+              <% poll.poll_options.limit(3).each do |option| %>
+                <div class="option-preview">
+                  <%= option.option_text %>
+                  <span class="vote-count">(<%= option.poll_votes.count %> votes)</span>
+                </div>
+              <% end %>
+              <% if poll.poll_options.count > 3 %>
+                <div class="more-options">... and <%= poll.poll_options.count - 3 %> more options</div>
+              <% end %>
+            </div>
+            
+            <div class="poll-actions">
+              <% if poll.voted_by?(current_user) %>
+                <span class="label label-success">You voted</span>
+                <%= link_to "View Results", poll, class: "btn btn-sm btn-default" %>
+              <% elsif can_vote_on_poll?(poll) %>
+                <%= link_to "Vote Now", poll, class: "btn btn-sm btn-primary" %>
+                <%= link_to "View Results", poll_path(poll, results: true), class: "btn btn-sm btn-default" %>
+              <% elsif !current_user.following?(poll.user) && poll.user != current_user %>
+                <span class="text-muted">Follow <%= poll.user.name %> to vote</span>
+                <%= link_to "View Results", poll, class: "btn btn-sm btn-default" %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <%= will_paginate @polls %>
+    <% else %>
+      <p>No polls yet. Be the first to create one!</p>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .polls {
+    margin-top: 20px;
+  }
+  
+  .poll-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: white;
+  }
+  
+  .poll-header {
+    display: flex;
+    margin-bottom: 15px;
+  }
+  
+  .poll-info {
+    margin-left: 15px;
+    flex-grow: 1;
+  }
+  
+  .poll-info h4 {
+    margin: 0 0 5px 0;
+  }
+  
+  .poll-meta {
+    color: #777;
+    font-size: 0.9em;
+  }
+  
+  .poll-options-preview {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f8f8f8;
+    border-radius: 4px;
+  }
+  
+  .option-preview {
+    padding: 5px 0;
+    border-bottom: 1px dotted #ddd;
+  }
+  
+  .option-preview:last-child {
+    border-bottom: none;
+  }
+  
+  .vote-count {
+    color: #777;
+    font-size: 0.9em;
+  }
+  
+  .more-options {
+    color: #777;
+    font-style: italic;
+    margin-top: 5px;
+  }
+  
+  .poll-actions {
+    margin-top: 10px;
+  }
+  
+  .poll-actions .btn {
+    margin-right: 5px;
+  }
+</style>

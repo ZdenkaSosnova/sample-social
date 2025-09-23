@@ -1,0 +1,230 @@
+<% provide(:title, @poll.question) %>
+
+<div class="row">
+  <div class="col-md-8 col-md-offset-2">
+    <div class="poll-container">
+      <div class="poll-header">
+        <%= link_to gravatar_for(@poll.user, size: 60), @poll.user %>
+        <div class="poll-info">
+          <h2><%= @poll.question %></h2>
+          <p class="poll-meta">
+            Created by <%= link_to @poll.user.name, @poll.user %> • 
+            <%= time_ago_in_words(@poll.created_at) %> ago
+          </p>
+        </div>
+      </div>
+      
+      <div class="poll-body">
+        <% if @poll.voted_by?(current_user) %>
+          <h4>Results</h4>
+          <div class="poll-results">
+            <% @poll.poll_options.each do |option| %>
+              <div class="poll-option-result">
+                <div class="option-text">
+                  <%= option.option_text %>
+                  <% if @user_vote && @user_vote.poll_option == option %>
+                    <span class="label label-success">Your vote</span>
+                  <% end %>
+                </div>
+                <div class="progress">
+                  <div class="progress-bar progress-bar-info" 
+                       style="width: <%= option.vote_percentage %>%">
+                    <%= option.vote_percentage %>%
+                  </div>
+                </div>
+                <div class="vote-count">
+                  <%= pluralize(option.poll_votes.count, 'vote') %>
+                </div>
+              </div>
+            <% end %>
+            <div class="total-votes">
+              Total: <%= pluralize(@poll.total_votes, 'vote') %>
+            </div>
+          </div>
+        <% elsif can_vote_on_poll?(@poll) %>
+          <% if params[:results] == "true" %>
+            <h4>Current Results</h4>
+            <div class="alert alert-warning">
+              You haven't voted yet. <%= link_to "Cast your vote", poll_path(@poll), class: "btn btn-sm btn-primary" %>
+            </div>
+            <div class="poll-results preview">
+              <% @poll.poll_options.each do |option| %>
+                <div class="poll-option-result">
+                  <div class="option-text"><%= option.option_text %></div>
+                  <div class="progress">
+                    <div class="progress-bar progress-bar-info" 
+                         style="width: <%= option.vote_percentage %>%">
+                      <%= option.vote_percentage %>%
+                    </div>
+                  </div>
+                  <div class="vote-count">
+                    <%= pluralize(option.poll_votes.count, 'vote') %>
+                  </div>
+                </div>
+              <% end %>
+              <div class="total-votes">
+                Total: <%= pluralize(@poll.total_votes, 'vote') %>
+              </div>
+            </div>
+          <% else %>
+            <h4>Cast your vote:</h4>
+            <div class="poll-options">
+              <% @poll.poll_options.each do |option| %>
+                <%= form_with url: vote_poll_path(@poll), method: :post, local: true, class: "vote-form" do |f| %>
+                  <%= hidden_field_tag :option_id, option.id %>
+                  <%= f.submit option.option_text, class: "btn btn-default btn-block vote-button" %>
+                <% end %>
+              <% end %>
+            </div>
+            <div class="view-results-link">
+              <%= link_to "View current results without voting", poll_path(@poll, results: true), 
+                          class: "text-muted" %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="alert alert-info">
+            <% if current_user == @poll.user %>
+              You cannot vote on your own poll. Waiting for others to vote...
+            <% else %>
+              You need to follow <%= link_to @poll.user.name, @poll.user %> to vote on this poll.
+              <%= link_to "Follow", relationships_path, method: :post, 
+                          params: { followed_id: @poll.user.id },
+                          class: "btn btn-sm btn-primary" %>
+            <% end %>
+          </div>
+          
+          <h4>Current Results</h4>
+          <div class="poll-results">
+            <% @poll.poll_options.each do |option| %>
+              <div class="poll-option-result">
+                <div class="option-text"><%= option.option_text %></div>
+                <div class="progress">
+                  <div class="progress-bar progress-bar-info" 
+                       style="width: <%= option.vote_percentage %>%">
+                    <%= option.vote_percentage %>%
+                  </div>
+                </div>
+                <div class="vote-count">
+                  <%= pluralize(option.poll_votes.count, 'vote') %>
+                </div>
+              </div>
+            <% end %>
+            <div class="total-votes">
+              Total: <%= pluralize(@poll.total_votes, 'vote') %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="poll-footer">
+        <%= link_to "Back to Polls", polls_path, class: "btn btn-default" %>
+        <% if current_user == @poll.user %>
+          <%= link_to "Delete Poll", @poll, 
+                      data: { 
+                        "turbo-method": :delete,
+                        turbo_confirm: "Are you sure you want to delete this poll?" 
+                      },
+                      class: "btn btn-danger" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .poll-container {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  .poll-header {
+    display: flex;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .poll-info {
+    margin-left: 15px;
+    flex-grow: 1;
+  }
+  
+  .poll-info h2 {
+    margin: 0 0 10px 0;
+  }
+  
+  .poll-meta {
+    color: #777;
+  }
+  
+  .poll-body {
+    margin: 20px 0;
+  }
+  
+  .poll-option-result {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f8f8;
+    border-radius: 4px;
+  }
+  
+  .option-text {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .progress {
+    height: 25px;
+    margin: 5px 0;
+  }
+  
+  .progress-bar {
+    line-height: 25px;
+  }
+  
+  .vote-count {
+    color: #777;
+    font-size: 0.9em;
+  }
+  
+  .total-votes {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+    font-weight: bold;
+  }
+  
+  .vote-form {
+    margin-bottom: 10px;
+  }
+  
+  .vote-button {
+    text-align: left;
+    padding: 10px 15px;
+  }
+  
+  .vote-button:hover {
+    background: #337ab7;
+    color: white;
+  }
+  
+  .poll-footer {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+  
+  .view-results-link {
+    text-align: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dotted #ddd;
+  }
+  
+  .poll-results.preview {
+    opacity: 0.8;
+  }
+</style>
