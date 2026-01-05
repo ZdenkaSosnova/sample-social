@@ -63,4 +63,6 @@ RSpec.configure do |config|
 
   # Include AuthenticationHelper for system tests
   config.include AuthenticationHelper, type: :system
+  config.include NavbarHelper, type: :system
+  config.include MicropostHelper, type: :system
 end

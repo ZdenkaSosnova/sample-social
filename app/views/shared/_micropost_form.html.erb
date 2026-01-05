@@ -1,17 +1,17 @@
 <%= form_with(model: @micropost) do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
   <div class="field">
-    <%= f.text_area :content, placeholder: "Compose new micropost..." %>
+    <%= f.text_area :content, placeholder: "Compose new micropost...", 'aria-label': "Micropost content" %>
   </div>
-  
+
   <div class="field">
-    <%= f.select :visibility, 
-        options_for_select([
-          ['🌍 Everyone', 'public'],
-          ['👥 Followers only', 'followers_only']
-        ], 'public'),
-        {},
-        { class: 'form-control' } %>
+    <%= f.select :visibility,
+                 options_for_select([
+                                      ['Everyone', 'public'],
+                                      ['Followers only', 'followers_only']
+                                    ], 'public'),
+                 {},
+                 { class: 'form-control', 'aria-label': "Visibility" } %>
   </div>
   
   <%= f.submit "Post", class: "btn btn-primary" %>

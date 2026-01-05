@@ -14,8 +14,7 @@ end
 RSpec.configure do |config|
   config.append_before(:each, type: :system) do |example|
     if example.metadata[:signed_in]
-      user_to_sign_in = respond_to?(:admin_user) ? admin_user : current_user
-      sign_in(user_to_sign_in)
+      sign_in(current_user)
     end
   end
 end
