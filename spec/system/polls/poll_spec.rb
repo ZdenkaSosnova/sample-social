@@ -29,7 +29,7 @@ RSpec.describe "Polls", type: :system do
     let(:poll) { create(:poll) }
     let!(:custom_option) { create(:poll_option, poll: poll, option_text: "Custom option") }
     let(:voter) { create(:user) }
-    let!(:vote) { create(:poll_vote, user: voter, poll_option: poll.poll_options.first) }
+    let!(:vote) { create(:poll_vote, user: voter, poll_option: custom_option) }
 
     it "prevents duplicate voting" do
       skip "Factory setup assignment - test implementation not required"
@@ -38,7 +38,7 @@ RSpec.describe "Polls", type: :system do
       expect(poll.question).to eq("Sample poll question?")
       expect(poll.poll_options.reload.map(&:option_text)).to include("Custom option")
       expect(vote.user).to eq(voter)
-      expect(vote.poll_option).to eq(poll.poll_options.first)
+      expect(vote.poll_option).to eq(custom_option)
       expect(poll.voted_by?(voter)).to be true
     end
   end
