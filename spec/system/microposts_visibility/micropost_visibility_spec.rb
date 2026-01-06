@@ -13,7 +13,7 @@ RSpec.describe 'Micropost visibility', type: :system do
     expect(page).to have_content('John Doe')
   end
 
-  it 'user can take a look at other user feed' do
+  it 'logged-in user viewing microposts on other user profile' do
     visit user_path(user)
 
     expect(page).not_to have_css("#micropost-#{micropost.id}")
