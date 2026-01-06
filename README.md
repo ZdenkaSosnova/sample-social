@@ -77,9 +77,29 @@ Follow the instructions in [Section 1.2.2 `rails server`](https://www.railstutor
 
 ## Test Suite
 
+> 📋 **Testing Documentation Available!**  
+> For detailed information about running tests and understanding the testing setup, please see **[TEST_SETUP.md](TEST_SETUP.md)**
+
+### Testing Stack
+
 - **RSpec Rails (6.1.5)**
 - **Capybara (3.40.0)**
 - **Selenium WebDriver (4.32.0)**
 - **Factory Bot Rails (6.5.0)**
 - **Shoulda Matchers (5.3.0)**
 - **Database Cleaner (2.2.2)**
+
+### Quick Test Commands
+
+```bash
+# Run all tests
+$ bundle exec rspec
+
+# Run specific test file
+$ bundle exec rspec spec/models/user_spec.rb
+
+# Run tests with documentation format
+$ bundle exec rspec --format documentation
+```
+
+For complete testing documentation including setup instructions, configuration details, and testing best practices, refer to **[TEST_SETUP.md](TEST_SETUP.md)**.
